@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#   Copyright (c) 2012 by Michael Goehler <visit@myjm.de>
+#   Copyright (c) 2012 by Michael Goehler <somebody.here@gmx.de>
 #
 #   This file is part of ownCloudTray.
 #
@@ -29,12 +29,12 @@ from optparse import OptionParser
 import ConfigParser
 
 
-class ownCloudTray:
+class ownCloudTray(pyinotify.ProcessEvent):
 
     def __init__(self):
         
         self.name = 'ownCloudTray'
-        self.version = '0.1.0'
+        self.version = '0.2.0'
         
         # parse command line arguments
         self.optParser = OptionParser(usage = "usage: %prog [options] filename",
@@ -138,7 +138,7 @@ class ownCloudTray:
         self.watchman = pyinotify.WatchManager()
         self.watchdesc = None
         self.mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
-        self.notifier = pyinotify.ThreadedNotifier(self.watchman, EventHandler())
+        self.notifier = pyinotify.ThreadedNotifier(self.watchman, self)
         self.notifier.start()
         
     
@@ -172,6 +172,11 @@ class ownCloudTray:
             Gtk.main()
         except KeyboardInterrupt:
             Gtk.main_quit()
+            
+            #--
+            Gdk.threads_leave()
+            self.csyncTimer.cancel()
+            self.notifier.stop()
         
         # clean exit
         Gdk.threads_leave()
@@ -219,12 +224,13 @@ class ownCloudTray:
         print 'End %s with returncode %s' % (self.csyncExe ,returncode)
         
         if not self.csyncForceStop == True:
-            self.csyncTimer = threading.Timer(self.csyncTimeout, self.cbSync)
-            self.csyncTimer.start()
-        
             self.csyncInProgress = False
+
             if self.csyncSubmitAgain == True:
                 self.cbSync()
+            else
+                self.csyncTimer = threading.Timer(self.csyncTimeout, self.cbSync)
+                self.csyncTimer.start()
         else:
             self.csyncTimer.cancel()
 
@@ -395,38 +401,39 @@ class ownCloudTray:
     # find position for menu
     def pos(self, menu, icon):
                 return (Gtk.StatusIcon.position_menu(menu, icon))
-                
-
-class EventHandler(pyinotify.ProcessEvent):
     
     
     def process_IN_CREATE(self, event):
         if event.name != 'csync_timediff.ctmp':
             print 'Sync triggered by creation of %s' % os.path.join(event.path, event.name)
-            ownCloudTray.cbSync()
+            self.cbSync()
         
         
     def process_IN_DELETE(self, event):
         if event.name != 'csync_timediff.ctmp':
             print 'Sync triggered by deletion of %s' % os.path.join(event.path, event.name)
-            ownCloudTray.cbSync()
+            self.cbSync()
         
         
     def process_IN_MODIFY(self, event):
-        print 'Sync triggered by modifing %s' % os.path.join(event.path, event.name)
-        ownCloudTray.cbSync()
+        if event.name != 'csync_timediff.ctmp':
+            print 'Sync triggered by modifing %s' % os.path.join(event.path, event.name)
+            self.cbSync()
         
         
     def process_IN_MOVED_FROM(self, event):
-        print 'Sync triggered by moving out %s' % os.path.join(event.path, event.name)
-        ownCloudTray.cbSync()
+        if event.name != 'csync_timediff.ctmp':
+            print 'Sync triggered by moving out %s' % os.path.join(event.path, event.name)
+            self.cbSync()
     
     
     def process_IN_MOVED_TO(self, event):
-        print 'Sync triggered by moving in %s' % os.path.join(event.path, event.name)
-        ownCloudTray.cbSync()
+        if event.name != 'csync_timediff.ctmp':
+            print 'Sync triggered by moving in %s' % os.path.join(event.path, event.name)
+            self.cbSync()
         
     
 if __name__ == '__main__':
     ownCloudTray = ownCloudTray()
     ownCloudTray.main()
+
