@@ -1,0 +1,8 @@
+ownCloudTray
+
+A python GTK+3 sync client for ownCloud depending on csync.
+
+Thanks to:
+* Frank Karlitschek and the ownCloud community for ownCloud (http://owncloud.org/)
+* Andreas Schneider for csync (http://www.csync.org/)
+
