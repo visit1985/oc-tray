@@ -404,31 +404,31 @@ class ownCloudTray(pyinotify.ProcessEvent):
     
     
     def process_IN_CREATE(self, event):
-        if event.name != 'csync_timediff.ctmp':
+        if event.name != '.csync_timediff.ctmp':
             print 'Sync triggered by creation of %s' % os.path.join(event.path, event.name)
             self.cbSync()
         
         
     def process_IN_DELETE(self, event):
-        if event.name != 'csync_timediff.ctmp':
+        if event.name != '.csync_timediff.ctmp':
             print 'Sync triggered by deletion of %s' % os.path.join(event.path, event.name)
             self.cbSync()
         
         
     def process_IN_MODIFY(self, event):
-        if event.name != 'csync_timediff.ctmp':
+        if event.name != '.csync_timediff.ctmp':
             print 'Sync triggered by modifing %s' % os.path.join(event.path, event.name)
             self.cbSync()
         
         
     def process_IN_MOVED_FROM(self, event):
-        if event.name != 'csync_timediff.ctmp':
+        if event.name != '.csync_timediff.ctmp':
             print 'Sync triggered by moving out %s' % os.path.join(event.path, event.name)
             self.cbSync()
     
     
     def process_IN_MOVED_TO(self, event):
-        if event.name != 'csync_timediff.ctmp':
+        if event.name != '.csync_timediff.ctmp':
             print 'Sync triggered by moving in %s' % os.path.join(event.path, event.name)
             self.cbSync()
         
