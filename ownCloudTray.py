@@ -230,7 +230,7 @@ class ownCloudTray(pyinotify.ProcessEvent):
 
             if self.csyncSubmitAgain == True:
                 self.cbSync()
-            else
+            else:
                 self.csyncTimer = threading.Timer(self.csyncTimeout, self.cbSync)
                 self.csyncTimer.start()
         else:
